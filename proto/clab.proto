@@ -1,0 +1,127 @@
+syntax = "proto3";
+
+package clab.v1;
+
+option go_package = "clabgrpc/gen/clabv1;clabv1";
+
+// Containerlab exposes the core lifecycle commands of the containerlab CLI.
+// It is a thin gRPC front-end over the github.com/srl-labs/containerlab/core
+// library: every RPC builds a core.CLab and calls the matching method.
+service Containerlab {
+  rpc Deploy   (DeployRequest)   returns (LabState);
+  rpc Destroy  (DestroyRequest)  returns (DestroyResponse);
+  // Redeploy is a server-side Destroy followed by Deploy.
+  rpc Redeploy (RedeployRequest) returns (LabState);
+  rpc Inspect  (InspectRequest)  returns (LabState);
+  rpc Exec     (ExecRequest)     returns (ExecResponse);
+
+  // GetHostStats returns one sample; StreamHostStats emits a sample every
+  // interval until the client disconnects.
+  rpc GetHostStats    (HostStatsRequest)       returns (HostStats);
+  rpc StreamHostStats (StreamHostStatsRequest) returns (stream HostStats);
+}
+
+// Node is a deployed lab node, mapped from runtime.GenericContainer.
+message Node {
+  string name = 1;
+  string kind = 2;
+  string image = 3;
+  string state = 4;
+  // CIDR form (e.g. 172.20.20.2/24), or "N/A" when unset
+  string ipv4_address = 5;
+  string ipv6_address = 6;
+}
+
+message LabState {
+  string lab_name = 1;
+  repeated Node nodes = 2;
+}
+
+// runtime defaults to "docker" when empty. timeout_seconds 0 = library default.
+message DeployRequest {
+  string topology_path = 1;
+  string runtime = 2;
+  uint32 timeout_seconds = 3;
+  bool reconfigure = 4;
+  uint32 max_workers = 5;
+  bool skip_post_deploy = 6;
+  repeated string node_filter = 7;
+}
+
+// Target the lab by topology_path OR lab_name (path wins if both set).
+message DestroyRequest {
+  string topology_path = 1;
+  string lab_name = 2;
+  string runtime = 3;
+  uint32 timeout_seconds = 4;
+  // remove the lab directory too
+  bool cleanup = 5;
+  bool graceful = 6;
+  bool keep_mgmt_net = 7;
+  repeated string node_filter = 8;
+}
+
+message DestroyResponse {
+  string lab_name = 1;
+}
+
+message RedeployRequest {
+  string topology_path = 1;
+  string runtime = 2;
+  uint32 timeout_seconds = 3;
+  bool cleanup = 4;
+  uint32 max_workers = 5;
+  bool keep_mgmt_net = 6;
+}
+
+// lab_name empty = inspect all containerlab-managed labs on the host.
+message InspectRequest {
+  string lab_name = 1;
+  string runtime = 2;
+  uint32 timeout_seconds = 3;
+}
+
+// Target by topology_path OR lab_name. node_filter selects node names.
+message ExecRequest {
+  string topology_path = 1;
+  string lab_name = 2;
+  string runtime = 3;
+  uint32 timeout_seconds = 4;
+  repeated string commands = 5;
+  repeated string node_filter = 6;
+}
+
+message ExecResult {
+  string node = 1;
+  repeated string cmd = 2;
+  int32 return_code = 3;
+  bytes stdout = 4;
+  bytes stderr = 5;
+}
+
+message ExecResponse {
+  repeated ExecResult results = 1;
+}
+
+message HostStatsRequest {}
+
+message StreamHostStatsRequest {
+  // sampling window; 0 selects the 2s default
+  uint32 interval_seconds = 1;
+}
+
+// HostStats is host-wide resource usage sampled via gopsutil.
+// Percent fields are 0-100; cpu_percent is the mean of per_cpu_percent.
+message HostStats {
+  double cpu_percent = 1;
+  uint64 mem_total_bytes = 2;
+  uint64 mem_used_bytes = 3;
+  double mem_percent = 4;
+  uint32 cpu_count = 5;
+  uint32 physical_cpu_count = 6;
+  repeated double per_cpu_percent = 7;
+  // load averages over 1, 5, and 15 minutes
+  double load1 = 8;
+  double load5 = 9;
+  double load15 = 10;
+}
