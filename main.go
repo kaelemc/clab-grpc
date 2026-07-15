@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"log"
 	"net"
 	"os"
@@ -18,11 +19,10 @@ import (
 )
 
 func main() {
-	sock := flag.String("socket", "/run/clab-grpc.sock", "unix socket to listen on")
-	addr := flag.String("listen", "", "optional TCP address (e.g. :5555); overrides -socket")
+	port := flag.Int("port", 8091, "TCP port to listen on")
 	flag.Parse()
 
-	lis, err := listen(*addr, *sock)
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", *port))
 	if err != nil {
 		log.Fatalf("listen: %v", err)
 	}
@@ -44,15 +44,6 @@ func main() {
 	if err := gs.Serve(lis); err != nil {
 		log.Fatalf("serve: %v", err)
 	}
-}
-
-func listen(addr, sock string) (net.Listener, error) {
-	if addr != "" {
-		return net.Listen("tcp", addr)
-	}
-	// clear a stale socket from a previous run
-	_ = os.Remove(sock)
-	return net.Listen("unix", sock)
 }
 
 // recoverInterceptor keeps a panic in containerlab core from killing the daemon.
