@@ -1,10 +1,10 @@
-package main
+package server
 
 import (
 	"context"
 	"time"
 
-	clabv1 "clabgrpc/gen/clabv1"
+	clabv1 "github.com/kaelemc/clab-grpc/gen/clabv1"
 
 	"github.com/shirou/gopsutil/v4/cpu"
 	"github.com/shirou/gopsutil/v4/load"
@@ -13,12 +13,9 @@ import (
 
 const defaultStatsInterval = 2 * time.Second
 
-// sampleHostStats measures per-core CPU over `window` (cpu.Percent blocks for
-// it) and reads current memory. Core counts and load average are best-effort:
-// a failure enriching those never fails the whole sample.
+// sampleHostStats measures per-core CPU over window (blocking for it) and reads
+// current memory. Core counts and load average are best-effort.
 func sampleHostStats(ctx context.Context, window time.Duration) (*clabv1.HostStats, error) {
-	// one per-core measurement; the aggregate is the mean, so we don't pay a
-	// second blocking window for the total.
 	perCPU, err := cpu.PercentWithContext(ctx, window, true)
 	if err != nil {
 		return nil, err

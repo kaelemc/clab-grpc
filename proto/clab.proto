@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package clab.v1;
 
-option go_package = "clabgrpc/gen/clabv1;clabv1";
+option go_package = "github.com/kaelemc/clab-grpc/gen/clabv1;clabv1";
 
 // Containerlab exposes the core lifecycle commands of the containerlab CLI.
 // It is a thin gRPC front-end over the github.com/srl-labs/containerlab/core

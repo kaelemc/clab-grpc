@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v7.35.0
-// source: clab.proto
+// source: proto/clab.proto
 
 package clabv1
 
@@ -363,5 +363,5 @@ var Containerlab_ServiceDesc = grpc.ServiceDesc{
 			ServerStreams: true,
 		},
 	},
-	Metadata: "clab.proto",
+	Metadata: "proto/clab.proto",
 }

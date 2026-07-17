@@ -1,10 +1,10 @@
-module clabgrpc
+module github.com/kaelemc/clab-grpc
 
 go 1.25.0
 
 require (
 	github.com/shirou/gopsutil/v4 v4.26.6
-	github.com/srl-labs/containerlab v0.0.0-00010101000000-000000000000
+	github.com/srl-labs/containerlab v0.77.0
 	google.golang.org/grpc v1.72.2
 	google.golang.org/protobuf v1.36.9
 )
@@ -212,6 +212,3 @@ require (
 	sigs.k8s.io/yaml v1.6.0 // indirect
 	tags.cncf.io/container-device-interface v1.0.1 // indirect
 )
-
-// Use the local containerlab checkout as a library.
-replace github.com/srl-labs/containerlab => ../containerlab

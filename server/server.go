@@ -1,4 +1,4 @@
-package main
+package server
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	clabv1 "clabgrpc/gen/clabv1"
+	clabv1 "github.com/kaelemc/clab-grpc/gen/clabv1"
 
 	clabconstants "github.com/srl-labs/containerlab/constants"
 	clabcore "github.com/srl-labs/containerlab/core"
@@ -22,9 +22,7 @@ const defaultTimeout = 120 * time.Second
 // server implements clabv1.ContainerlabServer over the containerlab core library.
 type server struct {
 	clabv1.UnimplementedContainerlabServer
-	// ponytail: one global lock serializes mutating RPCs; add per-lab locks only
-	// if you ever run concurrent labs on one host.
-	mu sync.Mutex
+	mu sync.Mutex // serializes mutating RPCs
 }
 
 func timeout(sec uint32) time.Duration {
@@ -63,8 +61,7 @@ func labState(name string, containers []clabruntime.GenericContainer) *clabv1.La
 	return ls
 }
 
-// toStatus maps a core error to a gRPC status. Missing topology files are the
-// one case worth distinguishing; everything else is Internal.
+// toStatus maps a core error to a gRPC status.
 func toStatus(err error) error {
 	if err == nil {
 		return nil
@@ -78,9 +75,7 @@ func toStatus(err error) error {
 	return status.Error(codes.Internal, err.Error())
 }
 
-// commonOpts builds the CLab options shared by every RPC: timeout and runtime
-// (empty runtime => docker), plus any caller opts (target topology path or lab
-// name, filters, etc.).
+// commonOpts builds the CLab options shared by every RPC, plus any caller opts.
 func commonOpts(runtime string, sec uint32, opts ...clabcore.ClabOption) []clabcore.ClabOption {
 	d := timeout(sec)
 	base := []clabcore.ClabOption{
@@ -99,7 +94,7 @@ func (s *server) Deploy(ctx context.Context, req *clabv1.DeployRequest) (*clabv1
 	return s.doDeploy(ctx, req)
 }
 
-// doDeploy holds the deploy logic without locking so Redeploy can reuse it.
+// doDeploy deploys without locking so Redeploy can reuse it.
 func (s *server) doDeploy(ctx context.Context, req *clabv1.DeployRequest) (*clabv1.LabState, error) {
 	opts := commonOpts(req.Runtime, req.TimeoutSeconds, clabcore.WithTopoPath(req.TopologyPath, nil))
 	if len(req.NodeFilter) > 0 {
@@ -135,7 +130,7 @@ func (s *server) Destroy(ctx context.Context, req *clabv1.DestroyRequest) (*clab
 	return &clabv1.DestroyResponse{LabName: name}, nil
 }
 
-// doDestroy holds the destroy logic without locking so Redeploy can reuse it.
+// doDestroy destroys without locking so Redeploy can reuse it.
 func (s *server) doDestroy(ctx context.Context, req *clabv1.DestroyRequest) (string, error) {
 	target := clabcore.WithLabNameOnly(req.LabName)
 	if req.TopologyPath != "" {
@@ -245,10 +240,7 @@ func (s *server) Exec(ctx context.Context, req *clabv1.ExecRequest) (*clabv1.Exe
 		want[n] = true
 	}
 
-	// ponytail: run exec ourselves via RunExec instead of core.Exec, because
-	// core.Exec returns an ExecCollection whose only external accessor is a
-	// JSON Dump that ambiguously inlines stdout when it happens to be valid JSON.
-	// RunExec hands back a typed *ExecResult directly.
+	// RunExec per container returns typed results, unlike core.Exec's JSON dump.
 	resp := &clabv1.ExecResponse{}
 	for i := range containers {
 		ctr := &containers[i]

@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.36.9
 // 	protoc        v7.35.0
-// source: clab.proto
+// source: proto/clab.proto
 
 package clabv1
 
@@ -37,7 +37,7 @@ type Node struct {
 
 func (x *Node) Reset() {
 	*x = Node{}
-	mi := &file_clab_proto_msgTypes[0]
+	mi := &file_proto_clab_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -49,7 +49,7 @@ func (x *Node) String() string {
 func (*Node) ProtoMessage() {}
 
 func (x *Node) ProtoReflect() protoreflect.Message {
-	mi := &file_clab_proto_msgTypes[0]
+	mi := &file_proto_clab_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -62,7 +62,7 @@ func (x *Node) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Node.ProtoReflect.Descriptor instead.
 func (*Node) Descriptor() ([]byte, []int) {
-	return file_clab_proto_rawDescGZIP(), []int{0}
+	return file_proto_clab_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *Node) GetName() string {
@@ -117,7 +117,7 @@ type LabState struct {
 
 func (x *LabState) Reset() {
 	*x = LabState{}
-	mi := &file_clab_proto_msgTypes[1]
+	mi := &file_proto_clab_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -129,7 +129,7 @@ func (x *LabState) String() string {
 func (*LabState) ProtoMessage() {}
 
 func (x *LabState) ProtoReflect() protoreflect.Message {
-	mi := &file_clab_proto_msgTypes[1]
+	mi := &file_proto_clab_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -142,7 +142,7 @@ func (x *LabState) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LabState.ProtoReflect.Descriptor instead.
 func (*LabState) Descriptor() ([]byte, []int) {
-	return file_clab_proto_rawDescGZIP(), []int{1}
+	return file_proto_clab_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *LabState) GetLabName() string {
@@ -175,7 +175,7 @@ type DeployRequest struct {
 
 func (x *DeployRequest) Reset() {
 	*x = DeployRequest{}
-	mi := &file_clab_proto_msgTypes[2]
+	mi := &file_proto_clab_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -187,7 +187,7 @@ func (x *DeployRequest) String() string {
 func (*DeployRequest) ProtoMessage() {}
 
 func (x *DeployRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_clab_proto_msgTypes[2]
+	mi := &file_proto_clab_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -200,7 +200,7 @@ func (x *DeployRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeployRequest.ProtoReflect.Descriptor instead.
 func (*DeployRequest) Descriptor() ([]byte, []int) {
-	return file_clab_proto_rawDescGZIP(), []int{2}
+	return file_proto_clab_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *DeployRequest) GetTopologyPath() string {
@@ -270,7 +270,7 @@ type DestroyRequest struct {
 
 func (x *DestroyRequest) Reset() {
 	*x = DestroyRequest{}
-	mi := &file_clab_proto_msgTypes[3]
+	mi := &file_proto_clab_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -282,7 +282,7 @@ func (x *DestroyRequest) String() string {
 func (*DestroyRequest) ProtoMessage() {}
 
 func (x *DestroyRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_clab_proto_msgTypes[3]
+	mi := &file_proto_clab_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -295,7 +295,7 @@ func (x *DestroyRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DestroyRequest.ProtoReflect.Descriptor instead.
 func (*DestroyRequest) Descriptor() ([]byte, []int) {
-	return file_clab_proto_rawDescGZIP(), []int{3}
+	return file_proto_clab_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *DestroyRequest) GetTopologyPath() string {
@@ -363,7 +363,7 @@ type DestroyResponse struct {
 
 func (x *DestroyResponse) Reset() {
 	*x = DestroyResponse{}
-	mi := &file_clab_proto_msgTypes[4]
+	mi := &file_proto_clab_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -375,7 +375,7 @@ func (x *DestroyResponse) String() string {
 func (*DestroyResponse) ProtoMessage() {}
 
 func (x *DestroyResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_clab_proto_msgTypes[4]
+	mi := &file_proto_clab_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -388,7 +388,7 @@ func (x *DestroyResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DestroyResponse.ProtoReflect.Descriptor instead.
 func (*DestroyResponse) Descriptor() ([]byte, []int) {
-	return file_clab_proto_rawDescGZIP(), []int{4}
+	return file_proto_clab_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *DestroyResponse) GetLabName() string {
@@ -412,7 +412,7 @@ type RedeployRequest struct {
 
 func (x *RedeployRequest) Reset() {
 	*x = RedeployRequest{}
-	mi := &file_clab_proto_msgTypes[5]
+	mi := &file_proto_clab_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -424,7 +424,7 @@ func (x *RedeployRequest) String() string {
 func (*RedeployRequest) ProtoMessage() {}
 
 func (x *RedeployRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_clab_proto_msgTypes[5]
+	mi := &file_proto_clab_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -437,7 +437,7 @@ func (x *RedeployRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RedeployRequest.ProtoReflect.Descriptor instead.
 func (*RedeployRequest) Descriptor() ([]byte, []int) {
-	return file_clab_proto_rawDescGZIP(), []int{5}
+	return file_proto_clab_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *RedeployRequest) GetTopologyPath() string {
@@ -494,7 +494,7 @@ type InspectRequest struct {
 
 func (x *InspectRequest) Reset() {
 	*x = InspectRequest{}
-	mi := &file_clab_proto_msgTypes[6]
+	mi := &file_proto_clab_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -506,7 +506,7 @@ func (x *InspectRequest) String() string {
 func (*InspectRequest) ProtoMessage() {}
 
 func (x *InspectRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_clab_proto_msgTypes[6]
+	mi := &file_proto_clab_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -519,7 +519,7 @@ func (x *InspectRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use InspectRequest.ProtoReflect.Descriptor instead.
 func (*InspectRequest) Descriptor() ([]byte, []int) {
-	return file_clab_proto_rawDescGZIP(), []int{6}
+	return file_proto_clab_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *InspectRequest) GetLabName() string {
@@ -558,7 +558,7 @@ type ExecRequest struct {
 
 func (x *ExecRequest) Reset() {
 	*x = ExecRequest{}
-	mi := &file_clab_proto_msgTypes[7]
+	mi := &file_proto_clab_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -570,7 +570,7 @@ func (x *ExecRequest) String() string {
 func (*ExecRequest) ProtoMessage() {}
 
 func (x *ExecRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_clab_proto_msgTypes[7]
+	mi := &file_proto_clab_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -583,7 +583,7 @@ func (x *ExecRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExecRequest.ProtoReflect.Descriptor instead.
 func (*ExecRequest) Descriptor() ([]byte, []int) {
-	return file_clab_proto_rawDescGZIP(), []int{7}
+	return file_proto_clab_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *ExecRequest) GetTopologyPath() string {
@@ -641,7 +641,7 @@ type ExecResult struct {
 
 func (x *ExecResult) Reset() {
 	*x = ExecResult{}
-	mi := &file_clab_proto_msgTypes[8]
+	mi := &file_proto_clab_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -653,7 +653,7 @@ func (x *ExecResult) String() string {
 func (*ExecResult) ProtoMessage() {}
 
 func (x *ExecResult) ProtoReflect() protoreflect.Message {
-	mi := &file_clab_proto_msgTypes[8]
+	mi := &file_proto_clab_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -666,7 +666,7 @@ func (x *ExecResult) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExecResult.ProtoReflect.Descriptor instead.
 func (*ExecResult) Descriptor() ([]byte, []int) {
-	return file_clab_proto_rawDescGZIP(), []int{8}
+	return file_proto_clab_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *ExecResult) GetNode() string {
@@ -713,7 +713,7 @@ type ExecResponse struct {
 
 func (x *ExecResponse) Reset() {
 	*x = ExecResponse{}
-	mi := &file_clab_proto_msgTypes[9]
+	mi := &file_proto_clab_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -725,7 +725,7 @@ func (x *ExecResponse) String() string {
 func (*ExecResponse) ProtoMessage() {}
 
 func (x *ExecResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_clab_proto_msgTypes[9]
+	mi := &file_proto_clab_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -738,7 +738,7 @@ func (x *ExecResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExecResponse.ProtoReflect.Descriptor instead.
 func (*ExecResponse) Descriptor() ([]byte, []int) {
-	return file_clab_proto_rawDescGZIP(), []int{9}
+	return file_proto_clab_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *ExecResponse) GetResults() []*ExecResult {
@@ -756,7 +756,7 @@ type HostStatsRequest struct {
 
 func (x *HostStatsRequest) Reset() {
 	*x = HostStatsRequest{}
-	mi := &file_clab_proto_msgTypes[10]
+	mi := &file_proto_clab_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -768,7 +768,7 @@ func (x *HostStatsRequest) String() string {
 func (*HostStatsRequest) ProtoMessage() {}
 
 func (x *HostStatsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_clab_proto_msgTypes[10]
+	mi := &file_proto_clab_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -781,7 +781,7 @@ func (x *HostStatsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HostStatsRequest.ProtoReflect.Descriptor instead.
 func (*HostStatsRequest) Descriptor() ([]byte, []int) {
-	return file_clab_proto_rawDescGZIP(), []int{10}
+	return file_proto_clab_proto_rawDescGZIP(), []int{10}
 }
 
 type StreamHostStatsRequest struct {
@@ -794,7 +794,7 @@ type StreamHostStatsRequest struct {
 
 func (x *StreamHostStatsRequest) Reset() {
 	*x = StreamHostStatsRequest{}
-	mi := &file_clab_proto_msgTypes[11]
+	mi := &file_proto_clab_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -806,7 +806,7 @@ func (x *StreamHostStatsRequest) String() string {
 func (*StreamHostStatsRequest) ProtoMessage() {}
 
 func (x *StreamHostStatsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_clab_proto_msgTypes[11]
+	mi := &file_proto_clab_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -819,7 +819,7 @@ func (x *StreamHostStatsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StreamHostStatsRequest.ProtoReflect.Descriptor instead.
 func (*StreamHostStatsRequest) Descriptor() ([]byte, []int) {
-	return file_clab_proto_rawDescGZIP(), []int{11}
+	return file_proto_clab_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *StreamHostStatsRequest) GetIntervalSeconds() uint32 {
@@ -850,7 +850,7 @@ type HostStats struct {
 
 func (x *HostStats) Reset() {
 	*x = HostStats{}
-	mi := &file_clab_proto_msgTypes[12]
+	mi := &file_proto_clab_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -862,7 +862,7 @@ func (x *HostStats) String() string {
 func (*HostStats) ProtoMessage() {}
 
 func (x *HostStats) ProtoReflect() protoreflect.Message {
-	mi := &file_clab_proto_msgTypes[12]
+	mi := &file_proto_clab_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -875,7 +875,7 @@ func (x *HostStats) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HostStats.ProtoReflect.Descriptor instead.
 func (*HostStats) Descriptor() ([]byte, []int) {
-	return file_clab_proto_rawDescGZIP(), []int{12}
+	return file_proto_clab_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *HostStats) GetCpuPercent() float64 {
@@ -948,12 +948,11 @@ func (x *HostStats) GetLoad15() float64 {
 	return 0
 }
 
-var File_clab_proto protoreflect.FileDescriptor
+var File_proto_clab_proto protoreflect.FileDescriptor
 
-const file_clab_proto_rawDesc = "" +
+const file_proto_clab_proto_rawDesc = "" +
 	"\n" +
-	"\n" +
-	"clab.proto\x12\aclab.v1\"\xa0\x01\n" +
+	"\x10proto/clab.proto\x12\aclab.v1\"\xa0\x01\n" +
 	"\x04Node\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x12\n" +
 	"\x04kind\x18\x02 \x01(\tR\x04kind\x12\x14\n" +
@@ -1040,22 +1039,22 @@ const file_clab_proto_rawDesc = "" +
 	"\aInspect\x12\x17.clab.v1.InspectRequest\x1a\x11.clab.v1.LabState\x123\n" +
 	"\x04Exec\x12\x14.clab.v1.ExecRequest\x1a\x15.clab.v1.ExecResponse\x12=\n" +
 	"\fGetHostStats\x12\x19.clab.v1.HostStatsRequest\x1a\x12.clab.v1.HostStats\x12H\n" +
-	"\x0fStreamHostStats\x12\x1f.clab.v1.StreamHostStatsRequest\x1a\x12.clab.v1.HostStats0\x01B\x1cZ\x1aclabgrpc/gen/clabv1;clabv1b\x06proto3"
+	"\x0fStreamHostStats\x12\x1f.clab.v1.StreamHostStatsRequest\x1a\x12.clab.v1.HostStats0\x01B0Z.github.com/kaelemc/clab-grpc/gen/clabv1;clabv1b\x06proto3"
 
 var (
-	file_clab_proto_rawDescOnce sync.Once
-	file_clab_proto_rawDescData []byte
+	file_proto_clab_proto_rawDescOnce sync.Once
+	file_proto_clab_proto_rawDescData []byte
 )
 
-func file_clab_proto_rawDescGZIP() []byte {
-	file_clab_proto_rawDescOnce.Do(func() {
-		file_clab_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_clab_proto_rawDesc), len(file_clab_proto_rawDesc)))
+func file_proto_clab_proto_rawDescGZIP() []byte {
+	file_proto_clab_proto_rawDescOnce.Do(func() {
+		file_proto_clab_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_proto_clab_proto_rawDesc), len(file_proto_clab_proto_rawDesc)))
 	})
-	return file_clab_proto_rawDescData
+	return file_proto_clab_proto_rawDescData
 }
 
-var file_clab_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
-var file_clab_proto_goTypes = []any{
+var file_proto_clab_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
+var file_proto_clab_proto_goTypes = []any{
 	(*Node)(nil),                   // 0: clab.v1.Node
 	(*LabState)(nil),               // 1: clab.v1.LabState
 	(*DeployRequest)(nil),          // 2: clab.v1.DeployRequest
@@ -1070,7 +1069,7 @@ var file_clab_proto_goTypes = []any{
 	(*StreamHostStatsRequest)(nil), // 11: clab.v1.StreamHostStatsRequest
 	(*HostStats)(nil),              // 12: clab.v1.HostStats
 }
-var file_clab_proto_depIdxs = []int32{
+var file_proto_clab_proto_depIdxs = []int32{
 	0,  // 0: clab.v1.LabState.nodes:type_name -> clab.v1.Node
 	8,  // 1: clab.v1.ExecResponse.results:type_name -> clab.v1.ExecResult
 	2,  // 2: clab.v1.Containerlab.Deploy:input_type -> clab.v1.DeployRequest
@@ -1094,26 +1093,26 @@ var file_clab_proto_depIdxs = []int32{
 	0,  // [0:2] is the sub-list for field type_name
 }
 
-func init() { file_clab_proto_init() }
-func file_clab_proto_init() {
-	if File_clab_proto != nil {
+func init() { file_proto_clab_proto_init() }
+func file_proto_clab_proto_init() {
+	if File_proto_clab_proto != nil {
 		return
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_clab_proto_rawDesc), len(file_clab_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_clab_proto_rawDesc), len(file_proto_clab_proto_rawDesc)),
 			NumEnums:      0,
 			NumMessages:   13,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
-		GoTypes:           file_clab_proto_goTypes,
-		DependencyIndexes: file_clab_proto_depIdxs,
-		MessageInfos:      file_clab_proto_msgTypes,
+		GoTypes:           file_proto_clab_proto_goTypes,
+		DependencyIndexes: file_proto_clab_proto_depIdxs,
+		MessageInfos:      file_proto_clab_proto_msgTypes,
 	}.Build()
-	File_clab_proto = out.File
-	file_clab_proto_goTypes = nil
-	file_clab_proto_depIdxs = nil
+	File_proto_clab_proto = out.File
+	file_proto_clab_proto_goTypes = nil
+	file_proto_clab_proto_depIdxs = nil
 }

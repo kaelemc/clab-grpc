@@ -1,10 +1,10 @@
-package main
+package server
 
 import (
 	"context"
 	"testing"
 
-	clabv1 "clabgrpc/gen/clabv1"
+	clabv1 "github.com/kaelemc/clab-grpc/gen/clabv1"
 )
 
 func TestGetHostStats(t *testing.T) {
