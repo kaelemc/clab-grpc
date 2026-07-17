@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"os"
 	"time"
 
 	clabv1 "github.com/kaelemc/clab-grpc/gen/clabv1"
@@ -47,6 +48,9 @@ func sampleHostStats(ctx context.Context, window time.Duration) (*clabv1.HostSta
 	}
 	if la, err := load.AvgWithContext(ctx); err == nil {
 		st.Load1, st.Load5, st.Load15 = la.Load1, la.Load5, la.Load15
+	}
+	if hn, err := os.Hostname(); err == nil {
+		st.Hostname = hn
 	}
 	return st, nil
 }

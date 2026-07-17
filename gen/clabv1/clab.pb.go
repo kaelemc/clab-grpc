@@ -827,6 +827,7 @@ type HostStats struct {
 	Load1         float64 `protobuf:"fixed64,8,opt,name=load1,proto3" json:"load1,omitempty"`
 	Load5         float64 `protobuf:"fixed64,9,opt,name=load5,proto3" json:"load5,omitempty"`
 	Load15        float64 `protobuf:"fixed64,10,opt,name=load15,proto3" json:"load15,omitempty"`
+	Hostname      string  `protobuf:"bytes,11,opt,name=hostname,proto3" json:"hostname,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -931,6 +932,13 @@ func (x *HostStats) GetLoad15() float64 {
 	return 0
 }
 
+func (x *HostStats) GetHostname() string {
+	if x != nil {
+		return x.Hostname
+	}
+	return ""
+}
+
 var File_proto_clab_proto protoreflect.FileDescriptor
 
 const file_proto_clab_proto_rawDesc = "" +
@@ -998,7 +1006,7 @@ const file_proto_clab_proto_rawDesc = "" +
 	"\aresults\x18\x01 \x03(\v2\x13.clab.v1.ExecResultR\aresults\"\x12\n" +
 	"\x10HostStatsRequest\"C\n" +
 	"\x16StreamHostStatsRequest\x12)\n" +
-	"\x10interval_seconds\x18\x01 \x01(\rR\x0fintervalSeconds\"\xd2\x02\n" +
+	"\x10interval_seconds\x18\x01 \x01(\rR\x0fintervalSeconds\"\xee\x02\n" +
 	"\tHostStats\x12\x1f\n" +
 	"\vcpu_percent\x18\x01 \x01(\x01R\n" +
 	"cpuPercent\x12&\n" +
@@ -1012,7 +1020,8 @@ const file_proto_clab_proto_rawDesc = "" +
 	"\x05load1\x18\b \x01(\x01R\x05load1\x12\x14\n" +
 	"\x05load5\x18\t \x01(\x01R\x05load5\x12\x16\n" +
 	"\x06load15\x18\n" +
-	" \x01(\x01R\x06load152\xaf\x03\n" +
+	" \x01(\x01R\x06load15\x12\x1a\n" +
+	"\bhostname\x18\v \x01(\tR\bhostname2\xaf\x03\n" +
 	"\fContainerlab\x123\n" +
 	"\x06Deploy\x12\x16.clab.v1.DeployRequest\x1a\x11.clab.v1.LabState\x12<\n" +
 	"\aDestroy\x12\x17.clab.v1.DestroyRequest\x1a\x18.clab.v1.DestroyResponse\x127\n" +

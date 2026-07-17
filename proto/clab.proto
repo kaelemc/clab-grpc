@@ -121,4 +121,5 @@ message HostStats {
   double load1 = 8;
   double load5 = 9;
   double load15 = 10;
+  string hostname = 11;
 }
