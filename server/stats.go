@@ -64,7 +64,15 @@ func (s *server) StreamHostStats(req *clabv1.StreamHostStatsRequest, stream clab
 	if interval <= 0 {
 		interval = defaultStatsInterval
 	}
-	ctx := stream.Context()
+	ctx, cancel := context.WithCancel(stream.Context())
+	defer cancel()
+	go func() {
+		select {
+		case <-s.stop:
+			cancel()
+		case <-ctx.Done():
+		}
+	}()
 	for {
 		// cpu.Percent blocks for `interval`, so it both measures and paces the stream.
 		st, err := sampleHostStats(ctx, interval)

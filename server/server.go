@@ -24,7 +24,8 @@ const defaultTimeout = 120 * time.Second
 // server implements clabv1.ContainerlabServer over the containerlab core library.
 type server struct {
 	clabv1.UnimplementedContainerlabServer
-	mu sync.Mutex // serializes mutating RPCs
+	stop chan struct{} // closed on shutdown; ends open streams so GracefulStop can finish
+	mu   sync.Mutex
 }
 
 func timeout(sec uint32) time.Duration {

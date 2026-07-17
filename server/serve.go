@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	clabv1 "github.com/kaelemc/clab-grpc/gen/clabv1"
 
@@ -15,6 +16,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/health"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
+	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc/status"
 )
@@ -27,8 +29,15 @@ func Serve(port int) error {
 		return fmt.Errorf("listen: %w", err)
 	}
 
-	gs := grpc.NewServer(grpc.UnaryInterceptor(recoverInterceptor))
-	clabv1.RegisterContainerlabServer(gs, &server{})
+	gs := grpc.NewServer(
+		grpc.UnaryInterceptor(recoverInterceptor),
+		grpc.KeepaliveEnforcementPolicy(keepalive.EnforcementPolicy{
+			MinTime:             1 * time.Second,
+			PermitWithoutStream: true,
+		}),
+	)
+	srv := &server{stop: make(chan struct{})}
+	clabv1.RegisterContainerlabServer(gs, srv)
 	// lets grpcurl work without local proto files
 	reflection.Register(gs)
 
@@ -41,6 +50,7 @@ func Serve(port int) error {
 		signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
 		<-sig
 		log.Println("shutting down")
+		close(srv.stop)
 		hs.Shutdown()
 		gs.GracefulStop()
 	}()
