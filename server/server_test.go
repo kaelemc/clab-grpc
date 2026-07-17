@@ -2,8 +2,12 @@ package server
 
 import (
 	"context"
+	"os"
+	"path/filepath"
 	"testing"
 	"time"
+
+	clabv1 "github.com/kaelemc/clab-grpc/gen/clabv1"
 
 	clabconstants "github.com/srl-labs/containerlab/constants"
 	clabruntime "github.com/srl-labs/containerlab/runtime"
@@ -62,9 +66,6 @@ func TestToStatus(t *testing.T) {
 	if code := status.Code(toStatus(context.DeadlineExceeded)); code != codes.DeadlineExceeded {
 		t.Errorf("deadline -> %v, want DeadlineExceeded", code)
 	}
-	if code := status.Code(toStatus(errString("open x.yml: no such file or directory"))); code != codes.InvalidArgument {
-		t.Errorf("missing file -> %v, want InvalidArgument", code)
-	}
 	if code := status.Code(toStatus(errString("boom"))); code != codes.Internal {
 		t.Errorf("generic -> %v, want Internal", code)
 	}
@@ -73,3 +74,34 @@ func TestToStatus(t *testing.T) {
 type errString string
 
 func (e errString) Error() string { return string(e) }
+
+func TestDeployRequiresTopology(t *testing.T) {
+	_, err := (&server{}).Deploy(context.Background(), &clabv1.DeployRequest{})
+	if status.Code(err) != codes.InvalidArgument {
+		t.Errorf("empty deploy -> %v, want InvalidArgument", err)
+	}
+	_, err = (&server{}).Redeploy(context.Background(), &clabv1.RedeployRequest{})
+	if status.Code(err) != codes.InvalidArgument {
+		t.Errorf("empty redeploy -> %v, want InvalidArgument", err)
+	}
+	_, err = (&server{}).Destroy(context.Background(), &clabv1.DestroyRequest{})
+	if status.Code(err) != codes.InvalidArgument {
+		t.Errorf("empty destroy -> %v, want InvalidArgument", err)
+	}
+	_, err = (&server{}).Exec(context.Background(), &clabv1.ExecRequest{Commands: []string{"true"}})
+	if status.Code(err) != codes.InvalidArgument {
+		t.Errorf("exec without lab_name -> %v, want InvalidArgument", err)
+	}
+}
+
+func TestWriteTempTopo(t *testing.T) {
+	p, err := writeTempTopo([]byte("name: t1\n"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(filepath.Dir(p))
+	b, err := os.ReadFile(p)
+	if err != nil || string(b) != "name: t1\n" {
+		t.Errorf("read back %q, %v; want file content", b, err)
+	}
+}

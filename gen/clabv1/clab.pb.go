@@ -162,7 +162,7 @@ func (x *LabState) GetNodes() []*Node {
 // runtime defaults to "docker" when empty. timeout_seconds 0 = library default.
 type DeployRequest struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
-	TopologyPath   string                 `protobuf:"bytes,1,opt,name=topology_path,json=topologyPath,proto3" json:"topology_path,omitempty"`
+	TopologyYaml   []byte                 `protobuf:"bytes,1,opt,name=topology_yaml,json=topologyYaml,proto3" json:"topology_yaml,omitempty"`
 	Runtime        string                 `protobuf:"bytes,2,opt,name=runtime,proto3" json:"runtime,omitempty"`
 	TimeoutSeconds uint32                 `protobuf:"varint,3,opt,name=timeout_seconds,json=timeoutSeconds,proto3" json:"timeout_seconds,omitempty"`
 	Reconfigure    bool                   `protobuf:"varint,4,opt,name=reconfigure,proto3" json:"reconfigure,omitempty"`
@@ -203,11 +203,11 @@ func (*DeployRequest) Descriptor() ([]byte, []int) {
 	return file_proto_clab_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *DeployRequest) GetTopologyPath() string {
+func (x *DeployRequest) GetTopologyYaml() []byte {
 	if x != nil {
-		return x.TopologyPath
+		return x.TopologyYaml
 	}
-	return ""
+	return nil
 }
 
 func (x *DeployRequest) GetRuntime() string {
@@ -252,18 +252,16 @@ func (x *DeployRequest) GetNodeFilter() []string {
 	return nil
 }
 
-// Target the lab by topology_path OR lab_name (path wins if both set).
 type DestroyRequest struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
-	TopologyPath   string                 `protobuf:"bytes,1,opt,name=topology_path,json=topologyPath,proto3" json:"topology_path,omitempty"`
-	LabName        string                 `protobuf:"bytes,2,opt,name=lab_name,json=labName,proto3" json:"lab_name,omitempty"`
-	Runtime        string                 `protobuf:"bytes,3,opt,name=runtime,proto3" json:"runtime,omitempty"`
-	TimeoutSeconds uint32                 `protobuf:"varint,4,opt,name=timeout_seconds,json=timeoutSeconds,proto3" json:"timeout_seconds,omitempty"`
+	LabName        string                 `protobuf:"bytes,1,opt,name=lab_name,json=labName,proto3" json:"lab_name,omitempty"`
+	Runtime        string                 `protobuf:"bytes,2,opt,name=runtime,proto3" json:"runtime,omitempty"`
+	TimeoutSeconds uint32                 `protobuf:"varint,3,opt,name=timeout_seconds,json=timeoutSeconds,proto3" json:"timeout_seconds,omitempty"`
 	// remove the lab directory too
-	Cleanup       bool     `protobuf:"varint,5,opt,name=cleanup,proto3" json:"cleanup,omitempty"`
-	Graceful      bool     `protobuf:"varint,6,opt,name=graceful,proto3" json:"graceful,omitempty"`
-	KeepMgmtNet   bool     `protobuf:"varint,7,opt,name=keep_mgmt_net,json=keepMgmtNet,proto3" json:"keep_mgmt_net,omitempty"`
-	NodeFilter    []string `protobuf:"bytes,8,rep,name=node_filter,json=nodeFilter,proto3" json:"node_filter,omitempty"`
+	Cleanup       bool     `protobuf:"varint,4,opt,name=cleanup,proto3" json:"cleanup,omitempty"`
+	Graceful      bool     `protobuf:"varint,5,opt,name=graceful,proto3" json:"graceful,omitempty"`
+	KeepMgmtNet   bool     `protobuf:"varint,6,opt,name=keep_mgmt_net,json=keepMgmtNet,proto3" json:"keep_mgmt_net,omitempty"`
+	NodeFilter    []string `protobuf:"bytes,7,rep,name=node_filter,json=nodeFilter,proto3" json:"node_filter,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -296,13 +294,6 @@ func (x *DestroyRequest) ProtoReflect() protoreflect.Message {
 // Deprecated: Use DestroyRequest.ProtoReflect.Descriptor instead.
 func (*DestroyRequest) Descriptor() ([]byte, []int) {
 	return file_proto_clab_proto_rawDescGZIP(), []int{3}
-}
-
-func (x *DestroyRequest) GetTopologyPath() string {
-	if x != nil {
-		return x.TopologyPath
-	}
-	return ""
 }
 
 func (x *DestroyRequest) GetLabName() string {
@@ -400,7 +391,7 @@ func (x *DestroyResponse) GetLabName() string {
 
 type RedeployRequest struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
-	TopologyPath   string                 `protobuf:"bytes,1,opt,name=topology_path,json=topologyPath,proto3" json:"topology_path,omitempty"`
+	TopologyYaml   []byte                 `protobuf:"bytes,1,opt,name=topology_yaml,json=topologyYaml,proto3" json:"topology_yaml,omitempty"`
 	Runtime        string                 `protobuf:"bytes,2,opt,name=runtime,proto3" json:"runtime,omitempty"`
 	TimeoutSeconds uint32                 `protobuf:"varint,3,opt,name=timeout_seconds,json=timeoutSeconds,proto3" json:"timeout_seconds,omitempty"`
 	Cleanup        bool                   `protobuf:"varint,4,opt,name=cleanup,proto3" json:"cleanup,omitempty"`
@@ -440,11 +431,11 @@ func (*RedeployRequest) Descriptor() ([]byte, []int) {
 	return file_proto_clab_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *RedeployRequest) GetTopologyPath() string {
+func (x *RedeployRequest) GetTopologyYaml() []byte {
 	if x != nil {
-		return x.TopologyPath
+		return x.TopologyYaml
 	}
-	return ""
+	return nil
 }
 
 func (x *RedeployRequest) GetRuntime() string {
@@ -543,15 +534,14 @@ func (x *InspectRequest) GetTimeoutSeconds() uint32 {
 	return 0
 }
 
-// Target by topology_path OR lab_name. node_filter selects node names.
+// node_filter selects node names; empty runs on every node in the lab.
 type ExecRequest struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
-	TopologyPath   string                 `protobuf:"bytes,1,opt,name=topology_path,json=topologyPath,proto3" json:"topology_path,omitempty"`
-	LabName        string                 `protobuf:"bytes,2,opt,name=lab_name,json=labName,proto3" json:"lab_name,omitempty"`
-	Runtime        string                 `protobuf:"bytes,3,opt,name=runtime,proto3" json:"runtime,omitempty"`
-	TimeoutSeconds uint32                 `protobuf:"varint,4,opt,name=timeout_seconds,json=timeoutSeconds,proto3" json:"timeout_seconds,omitempty"`
-	Commands       []string               `protobuf:"bytes,5,rep,name=commands,proto3" json:"commands,omitempty"`
-	NodeFilter     []string               `protobuf:"bytes,6,rep,name=node_filter,json=nodeFilter,proto3" json:"node_filter,omitempty"`
+	LabName        string                 `protobuf:"bytes,1,opt,name=lab_name,json=labName,proto3" json:"lab_name,omitempty"`
+	Runtime        string                 `protobuf:"bytes,2,opt,name=runtime,proto3" json:"runtime,omitempty"`
+	TimeoutSeconds uint32                 `protobuf:"varint,3,opt,name=timeout_seconds,json=timeoutSeconds,proto3" json:"timeout_seconds,omitempty"`
+	Commands       []string               `protobuf:"bytes,4,rep,name=commands,proto3" json:"commands,omitempty"`
+	NodeFilter     []string               `protobuf:"bytes,5,rep,name=node_filter,json=nodeFilter,proto3" json:"node_filter,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -584,13 +574,6 @@ func (x *ExecRequest) ProtoReflect() protoreflect.Message {
 // Deprecated: Use ExecRequest.ProtoReflect.Descriptor instead.
 func (*ExecRequest) Descriptor() ([]byte, []int) {
 	return file_proto_clab_proto_rawDescGZIP(), []int{7}
-}
-
-func (x *ExecRequest) GetTopologyPath() string {
-	if x != nil {
-		return x.TopologyPath
-	}
-	return ""
 }
 
 func (x *ExecRequest) GetLabName() string {
@@ -964,7 +947,7 @@ const file_proto_clab_proto_rawDesc = "" +
 	"\blab_name\x18\x01 \x01(\tR\alabName\x12#\n" +
 	"\x05nodes\x18\x02 \x03(\v2\r.clab.v1.NodeR\x05nodes\"\x85\x02\n" +
 	"\rDeployRequest\x12#\n" +
-	"\rtopology_path\x18\x01 \x01(\tR\ftopologyPath\x12\x18\n" +
+	"\rtopology_yaml\x18\x01 \x01(\fR\ftopologyYaml\x12\x18\n" +
 	"\aruntime\x18\x02 \x01(\tR\aruntime\x12'\n" +
 	"\x0ftimeout_seconds\x18\x03 \x01(\rR\x0etimeoutSeconds\x12 \n" +
 	"\vreconfigure\x18\x04 \x01(\bR\vreconfigure\x12\x1f\n" +
@@ -972,21 +955,20 @@ const file_proto_clab_proto_rawDesc = "" +
 	"maxWorkers\x12(\n" +
 	"\x10skip_post_deploy\x18\x06 \x01(\bR\x0eskipPostDeploy\x12\x1f\n" +
 	"\vnode_filter\x18\a \x03(\tR\n" +
-	"nodeFilter\"\x8e\x02\n" +
-	"\x0eDestroyRequest\x12#\n" +
-	"\rtopology_path\x18\x01 \x01(\tR\ftopologyPath\x12\x19\n" +
-	"\blab_name\x18\x02 \x01(\tR\alabName\x12\x18\n" +
-	"\aruntime\x18\x03 \x01(\tR\aruntime\x12'\n" +
-	"\x0ftimeout_seconds\x18\x04 \x01(\rR\x0etimeoutSeconds\x12\x18\n" +
-	"\acleanup\x18\x05 \x01(\bR\acleanup\x12\x1a\n" +
-	"\bgraceful\x18\x06 \x01(\bR\bgraceful\x12\"\n" +
-	"\rkeep_mgmt_net\x18\a \x01(\bR\vkeepMgmtNet\x12\x1f\n" +
-	"\vnode_filter\x18\b \x03(\tR\n" +
+	"nodeFilter\"\xe9\x01\n" +
+	"\x0eDestroyRequest\x12\x19\n" +
+	"\blab_name\x18\x01 \x01(\tR\alabName\x12\x18\n" +
+	"\aruntime\x18\x02 \x01(\tR\aruntime\x12'\n" +
+	"\x0ftimeout_seconds\x18\x03 \x01(\rR\x0etimeoutSeconds\x12\x18\n" +
+	"\acleanup\x18\x04 \x01(\bR\acleanup\x12\x1a\n" +
+	"\bgraceful\x18\x05 \x01(\bR\bgraceful\x12\"\n" +
+	"\rkeep_mgmt_net\x18\x06 \x01(\bR\vkeepMgmtNet\x12\x1f\n" +
+	"\vnode_filter\x18\a \x03(\tR\n" +
 	"nodeFilter\",\n" +
 	"\x0fDestroyResponse\x12\x19\n" +
 	"\blab_name\x18\x01 \x01(\tR\alabName\"\xd8\x01\n" +
 	"\x0fRedeployRequest\x12#\n" +
-	"\rtopology_path\x18\x01 \x01(\tR\ftopologyPath\x12\x18\n" +
+	"\rtopology_yaml\x18\x01 \x01(\fR\ftopologyYaml\x12\x18\n" +
 	"\aruntime\x18\x02 \x01(\tR\aruntime\x12'\n" +
 	"\x0ftimeout_seconds\x18\x03 \x01(\rR\x0etimeoutSeconds\x12\x18\n" +
 	"\acleanup\x18\x04 \x01(\bR\acleanup\x12\x1f\n" +
@@ -996,14 +978,13 @@ const file_proto_clab_proto_rawDesc = "" +
 	"\x0eInspectRequest\x12\x19\n" +
 	"\blab_name\x18\x01 \x01(\tR\alabName\x12\x18\n" +
 	"\aruntime\x18\x02 \x01(\tR\aruntime\x12'\n" +
-	"\x0ftimeout_seconds\x18\x03 \x01(\rR\x0etimeoutSeconds\"\xcd\x01\n" +
-	"\vExecRequest\x12#\n" +
-	"\rtopology_path\x18\x01 \x01(\tR\ftopologyPath\x12\x19\n" +
-	"\blab_name\x18\x02 \x01(\tR\alabName\x12\x18\n" +
-	"\aruntime\x18\x03 \x01(\tR\aruntime\x12'\n" +
-	"\x0ftimeout_seconds\x18\x04 \x01(\rR\x0etimeoutSeconds\x12\x1a\n" +
-	"\bcommands\x18\x05 \x03(\tR\bcommands\x12\x1f\n" +
-	"\vnode_filter\x18\x06 \x03(\tR\n" +
+	"\x0ftimeout_seconds\x18\x03 \x01(\rR\x0etimeoutSeconds\"\xa8\x01\n" +
+	"\vExecRequest\x12\x19\n" +
+	"\blab_name\x18\x01 \x01(\tR\alabName\x12\x18\n" +
+	"\aruntime\x18\x02 \x01(\tR\aruntime\x12'\n" +
+	"\x0ftimeout_seconds\x18\x03 \x01(\rR\x0etimeoutSeconds\x12\x1a\n" +
+	"\bcommands\x18\x04 \x03(\tR\bcommands\x12\x1f\n" +
+	"\vnode_filter\x18\x05 \x03(\tR\n" +
 	"nodeFilter\"\x83\x01\n" +
 	"\n" +
 	"ExecResult\x12\x12\n" +

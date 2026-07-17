@@ -3,6 +3,8 @@ package server
 import (
 	"context"
 	"errors"
+	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 	"time"
@@ -61,6 +63,20 @@ func labState(name string, containers []clabruntime.GenericContainer) *clabv1.La
 	return ls
 }
 
+// writeTempTopo writes topology YAML to a temp dir and returns the file path.
+func writeTempTopo(yaml []byte) (string, error) {
+	dir, err := os.MkdirTemp("", "clab-grpc-*")
+	if err != nil {
+		return "", err
+	}
+	p := filepath.Join(dir, "topology.clab.yml")
+	if err := os.WriteFile(p, yaml, 0o644); err != nil {
+		os.RemoveAll(dir)
+		return "", err
+	}
+	return p, nil
+}
+
 // toStatus maps a core error to a gRPC status.
 func toStatus(err error) error {
 	if err == nil {
@@ -68,9 +84,6 @@ func toStatus(err error) error {
 	}
 	if errors.Is(err, context.DeadlineExceeded) {
 		return status.Error(codes.DeadlineExceeded, err.Error())
-	}
-	if strings.Contains(err.Error(), "no such file") {
-		return status.Error(codes.InvalidArgument, err.Error())
 	}
 	return status.Error(codes.Internal, err.Error())
 }
@@ -86,17 +99,22 @@ func commonOpts(runtime string, sec uint32, opts ...clabcore.ClabOption) []clabc
 }
 
 func (s *server) Deploy(ctx context.Context, req *clabv1.DeployRequest) (*clabv1.LabState, error) {
-	if req.TopologyPath == "" {
-		return nil, status.Error(codes.InvalidArgument, "topology_path is required")
+	if len(req.TopologyYaml) == 0 {
+		return nil, status.Error(codes.InvalidArgument, "topology_yaml is required")
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	return s.doDeploy(ctx, req)
+	topoPath, err := writeTempTopo(req.TopologyYaml)
+	if err != nil {
+		return nil, toStatus(err)
+	}
+	defer os.RemoveAll(filepath.Dir(topoPath))
+	return s.doDeploy(ctx, req, topoPath)
 }
 
-// doDeploy deploys without locking so Redeploy can reuse it.
-func (s *server) doDeploy(ctx context.Context, req *clabv1.DeployRequest) (*clabv1.LabState, error) {
-	opts := commonOpts(req.Runtime, req.TimeoutSeconds, clabcore.WithTopoPath(req.TopologyPath, nil))
+// doDeploy deploys from topoPath without locking so Redeploy can reuse it.
+func (s *server) doDeploy(ctx context.Context, req *clabv1.DeployRequest, topoPath string) (*clabv1.LabState, error) {
+	opts := commonOpts(req.Runtime, req.TimeoutSeconds, clabcore.WithTopoPath(topoPath, nil))
 	if len(req.NodeFilter) > 0 {
 		opts = append(opts, clabcore.WithNodeFilter(req.NodeFilter))
 	}
@@ -118,24 +136,20 @@ func (s *server) doDeploy(ctx context.Context, req *clabv1.DeployRequest) (*clab
 }
 
 func (s *server) Destroy(ctx context.Context, req *clabv1.DestroyRequest) (*clabv1.DestroyResponse, error) {
-	if req.TopologyPath == "" && req.LabName == "" {
-		return nil, status.Error(codes.InvalidArgument, "topology_path or lab_name is required")
+	if req.LabName == "" {
+		return nil, status.Error(codes.InvalidArgument, "lab_name is required")
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	name, err := s.doDestroy(ctx, req)
+	name, err := s.doDestroy(ctx, req, clabcore.WithLabNameOnly(req.LabName))
 	if err != nil {
 		return nil, err
 	}
 	return &clabv1.DestroyResponse{LabName: name}, nil
 }
 
-// doDestroy destroys without locking so Redeploy can reuse it.
-func (s *server) doDestroy(ctx context.Context, req *clabv1.DestroyRequest) (string, error) {
-	target := clabcore.WithLabNameOnly(req.LabName)
-	if req.TopologyPath != "" {
-		target = clabcore.WithTopoPath(req.TopologyPath, nil)
-	}
+// doDestroy destroys the lab selected by target without locking so Redeploy can reuse it.
+func (s *server) doDestroy(ctx context.Context, req *clabv1.DestroyRequest, target clabcore.ClabOption) (string, error) {
 	c, err := clabcore.NewContainerLab(
 		commonOpts(req.Runtime, req.TimeoutSeconds, target, clabcore.WithSkippedBindsPathsCheck())...,
 	)
@@ -166,26 +180,29 @@ func (s *server) doDestroy(ctx context.Context, req *clabv1.DestroyRequest) (str
 }
 
 func (s *server) Redeploy(ctx context.Context, req *clabv1.RedeployRequest) (*clabv1.LabState, error) {
-	if req.TopologyPath == "" {
-		return nil, status.Error(codes.InvalidArgument, "topology_path is required")
+	if len(req.TopologyYaml) == 0 {
+		return nil, status.Error(codes.InvalidArgument, "topology_yaml is required")
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	topoPath, err := writeTempTopo(req.TopologyYaml)
+	if err != nil {
+		return nil, toStatus(err)
+	}
+	defer os.RemoveAll(filepath.Dir(topoPath))
 	if _, err := s.doDestroy(ctx, &clabv1.DestroyRequest{
-		TopologyPath:   req.TopologyPath,
 		Runtime:        req.Runtime,
 		TimeoutSeconds: req.TimeoutSeconds,
 		Cleanup:        req.Cleanup,
 		KeepMgmtNet:    req.KeepMgmtNet,
-	}); err != nil {
+	}, clabcore.WithTopoPath(topoPath, nil)); err != nil {
 		return nil, err
 	}
 	return s.doDeploy(ctx, &clabv1.DeployRequest{
-		TopologyPath:   req.TopologyPath,
 		Runtime:        req.Runtime,
 		TimeoutSeconds: req.TimeoutSeconds,
 		MaxWorkers:     req.MaxWorkers,
-	})
+	}, topoPath)
 }
 
 func (s *server) Inspect(ctx context.Context, req *clabv1.InspectRequest) (*clabv1.LabState, error) {
@@ -210,27 +227,21 @@ func (s *server) Inspect(ctx context.Context, req *clabv1.InspectRequest) (*clab
 }
 
 func (s *server) Exec(ctx context.Context, req *clabv1.ExecRequest) (*clabv1.ExecResponse, error) {
-	if req.TopologyPath == "" && req.LabName == "" {
-		return nil, status.Error(codes.InvalidArgument, "topology_path or lab_name is required")
+	if req.LabName == "" {
+		return nil, status.Error(codes.InvalidArgument, "lab_name is required")
 	}
 	if len(req.Commands) == 0 {
 		return nil, status.Error(codes.InvalidArgument, "commands is required")
 	}
 
-	target := clabcore.WithLabNameOnly(req.LabName)
-	if req.TopologyPath != "" {
-		target = clabcore.WithTopoPath(req.TopologyPath, nil)
-	}
-	c, err := clabcore.NewContainerLab(commonOpts(req.Runtime, req.TimeoutSeconds, target)...)
+	c, err := clabcore.NewContainerLab(
+		commonOpts(req.Runtime, req.TimeoutSeconds, clabcore.WithLabNameOnly(req.LabName))...,
+	)
 	if err != nil {
 		return nil, toStatus(err)
 	}
 
-	labName := req.LabName
-	if labName == "" {
-		labName = c.Config.Name
-	}
-	containers, err := c.ListContainers(ctx, clabcore.WithListLabName(labName))
+	containers, err := c.ListContainers(ctx, clabcore.WithListLabName(req.LabName))
 	if err != nil {
 		return nil, toStatus(err)
 	}
