@@ -22,8 +22,12 @@ import (
 )
 
 // Serve serves the Containerlab gRPC service on port until SIGINT/SIGTERM,
-// then stops gracefully.
-func Serve(port int) error {
+// then stops gracefully. baseDir is where persistent per-lab working
+// directories are created; if empty, DefaultBaseDir is used.
+func Serve(port int, baseDir string) error {
+	if baseDir == "" {
+		baseDir = DefaultBaseDir
+	}
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err != nil {
 		return fmt.Errorf("listen: %w", err)
@@ -36,7 +40,7 @@ func Serve(port int) error {
 			PermitWithoutStream: true,
 		}),
 	)
-	srv := &server{stop: make(chan struct{})}
+	srv := &server{stop: make(chan struct{}), baseDir: baseDir}
 	clabv1.RegisterContainerlabServer(gs, srv)
 	// lets grpcurl work without local proto files
 	reflection.Register(gs)

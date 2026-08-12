@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -17,15 +18,23 @@ import (
 	clabruntime "github.com/srl-labs/containerlab/runtime"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	yaml "gopkg.in/yaml.v3"
 )
 
 const defaultTimeout = 120 * time.Second
 
+// DefaultBaseDir holds persistent per-lab working dirs. Outside /tmp so tmp
+// cleaners can't delete running nodes' bind-mount sources.
+const DefaultBaseDir = "/var/lib/clab-grpc"
+
+const topoFileName = "topology.clab.yml"
+
 // server implements clabv1.ContainerlabServer over the containerlab core library.
 type server struct {
 	clabv1.UnimplementedContainerlabServer
-	stop chan struct{} // closed on shutdown; ends open streams so GracefulStop can finish
-	mu   sync.Mutex
+	stop    chan struct{} // closed on shutdown; ends open streams so GracefulStop can finish
+	mu      sync.Mutex
+	baseDir string
 }
 
 func timeout(sec uint32) time.Duration {
@@ -64,15 +73,41 @@ func labState(name string, containers []clabruntime.GenericContainer) *clabv1.La
 	return ls
 }
 
-// writeTempTopo writes topology YAML to a temp dir and returns the file path.
-func writeTempTopo(yaml []byte) (string, error) {
-	dir, err := os.MkdirTemp("", "clab-grpc-*")
-	if err != nil {
+func labNameFromYAML(y []byte) (string, error) {
+	var t struct {
+		Name string `yaml:"name"`
+	}
+	if err := yaml.Unmarshal(y, &t); err != nil {
+		return "", fmt.Errorf("parsing topology yaml: %w", err)
+	}
+	name := strings.TrimSpace(t.Name)
+	if name == "" {
+		return "", errors.New("topology name is required")
+	}
+	// The name is joined onto baseDir; reject anything that isn't a lone path element.
+	if name != filepath.Base(name) || name == "." || name == ".." {
+		return "", fmt.Errorf("invalid topology name %q", name)
+	}
+	return name, nil
+}
+
+// labWorkdir returns the persistent working directory for a lab.
+func (s *server) labWorkdir(name string) string {
+	base := s.baseDir
+	if base == "" {
+		base = DefaultBaseDir
+	}
+	return filepath.Join(base, name)
+}
+
+// writeTopo writes the topology into the lab's persistent working dir and returns its path.
+func (s *server) writeTopo(name string, y []byte) (string, error) {
+	dir := s.labWorkdir(name)
+	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return "", err
 	}
-	p := filepath.Join(dir, "topology.clab.yml")
-	if err := os.WriteFile(p, yaml, 0o644); err != nil {
-		os.RemoveAll(dir)
+	p := filepath.Join(dir, topoFileName)
+	if err := os.WriteFile(p, y, 0o644); err != nil {
 		return "", err
 	}
 	return p, nil
@@ -105,11 +140,15 @@ func (s *server) Deploy(ctx context.Context, req *clabv1.DeployRequest) (*clabv1
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	topoPath, err := writeTempTopo(req.TopologyYaml)
+	name, err := labNameFromYAML(req.TopologyYaml)
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+	topoPath, err := s.writeTopo(name, req.TopologyYaml)
 	if err != nil {
 		return nil, toStatus(err)
 	}
-	defer os.RemoveAll(filepath.Dir(topoPath))
+	// clab-<name>/ next to topoPath holds nodes' bind-mounts for the lab's lifetime; keep it.
 	return s.doDeploy(ctx, req, topoPath)
 }
 
@@ -142,9 +181,23 @@ func (s *server) Destroy(ctx context.Context, req *clabv1.DestroyRequest) (*clab
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	name, err := s.doDestroy(ctx, req, clabcore.WithLabNameOnly(req.LabName))
+
+	// Use the deploy-time topo path so cleanup targets the exact lab dir; fall
+	// back to lab-name resolution for labs deployed before it existed.
+	dir := s.labWorkdir(req.LabName)
+	topoPath := filepath.Join(dir, topoFileName)
+	target := clabcore.WithLabNameOnly(req.LabName)
+	if _, statErr := os.Stat(topoPath); statErr == nil {
+		target = clabcore.WithTopoPath(topoPath, nil)
+	}
+
+	name, err := s.doDestroy(ctx, req, target)
 	if err != nil {
 		return nil, err
+	}
+	// Remove the lab dir after teardown so redeploys start clean.
+	if err := os.RemoveAll(dir); err != nil {
+		return nil, toStatus(err)
 	}
 	return &clabv1.DestroyResponse{LabName: name}, nil
 }
@@ -186,11 +239,14 @@ func (s *server) Redeploy(ctx context.Context, req *clabv1.RedeployRequest) (*cl
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	topoPath, err := writeTempTopo(req.TopologyYaml)
+	name, err := labNameFromYAML(req.TopologyYaml)
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+	topoPath, err := s.writeTopo(name, req.TopologyYaml)
 	if err != nil {
 		return nil, toStatus(err)
 	}
-	defer os.RemoveAll(filepath.Dir(topoPath))
 	if _, err := s.doDestroy(ctx, &clabv1.DestroyRequest{
 		Runtime:        req.Runtime,
 		TimeoutSeconds: req.TimeoutSeconds,

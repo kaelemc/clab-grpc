@@ -94,12 +94,29 @@ func TestDeployRequiresTopology(t *testing.T) {
 	}
 }
 
-func TestWriteTempTopo(t *testing.T) {
-	p, err := writeTempTopo([]byte("name: t1\n"))
+func TestLabNameFromYAML(t *testing.T) {
+	if got, err := labNameFromYAML([]byte("name: t1\n")); err != nil || got != "t1" {
+		t.Errorf("labNameFromYAML = %q, %v; want t1", got, err)
+	}
+	if _, err := labNameFromYAML([]byte("nodes: {}\n")); err == nil {
+		t.Error("missing name should error")
+	}
+	for _, bad := range []string{"a/b", "..", "."} {
+		if _, err := labNameFromYAML([]byte("name: " + bad + "\n")); err == nil {
+			t.Errorf("name %q should be rejected", bad)
+		}
+	}
+}
+
+func TestWriteTopo(t *testing.T) {
+	s := &server{baseDir: t.TempDir()}
+	p, err := s.writeTopo("t1", []byte("name: t1\n"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer os.RemoveAll(filepath.Dir(p))
+	if want := filepath.Join(s.baseDir, "t1", topoFileName); p != want {
+		t.Errorf("topo path = %q, want %q", p, want)
+	}
 	b, err := os.ReadFile(p)
 	if err != nil || string(b) != "name: t1\n" {
 		t.Errorf("read back %q, %v; want file content", b, err)
