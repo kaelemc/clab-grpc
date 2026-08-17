@@ -15,6 +15,7 @@ import (
 	clabconstants "github.com/srl-labs/containerlab/constants"
 	clabcore "github.com/srl-labs/containerlab/core"
 	clabexec "github.com/srl-labs/containerlab/exec"
+	clablinks "github.com/srl-labs/containerlab/links"
 	clabruntime "github.com/srl-labs/containerlab/runtime"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -124,6 +125,18 @@ func toStatus(err error) error {
 	return status.Error(codes.Internal, err.Error())
 }
 
+func resetImplicitLinkNodes() {
+	for _, n := range []clablinks.Node{clablinks.GetHostLinkNode(), clablinks.GetMgmtBrLinkNode()} {
+		owner, ok := n.(clablinks.EndpointOwner)
+		if !ok {
+			continue
+		}
+		for _, e := range append([]clablinks.Endpoint(nil), n.GetEndpoints()...) {
+			_ = owner.ReleaseEndpoint(e)
+		}
+	}
+}
+
 // commonOpts builds the CLab options shared by every RPC, plus any caller opts.
 func commonOpts(runtime string, sec uint32, opts ...clabcore.ClabOption) []clabcore.ClabOption {
 	d := timeout(sec)
@@ -168,6 +181,7 @@ func (s *server) doDeploy(ctx context.Context, req *clabv1.DeployRequest, topoPa
 	}
 	do.SetReconfigure(req.Reconfigure).SetSkipPostDeploy(req.SkipPostDeploy)
 
+	resetImplicitLinkNodes()
 	containers, err := c.Deploy(ctx, do)
 	if err != nil {
 		return nil, toStatus(err)
@@ -223,6 +237,7 @@ func (s *server) doDestroy(ctx context.Context, req *clabv1.DestroyRequest, targ
 	if len(req.NodeFilter) > 0 {
 		dopts = append(dopts, clabcore.WithDestroyNodeFilter(req.NodeFilter))
 	}
+	resetImplicitLinkNodes()
 	if err := c.Destroy(ctx, dopts...); err != nil {
 		return "", toStatus(err)
 	}

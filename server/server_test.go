@@ -10,6 +10,7 @@ import (
 	clabv1 "github.com/kaelemc/clab-grpc/gen/clabv1"
 
 	clabconstants "github.com/srl-labs/containerlab/constants"
+	clablinks "github.com/srl-labs/containerlab/links"
 	clabruntime "github.com/srl-labs/containerlab/runtime"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -105,6 +106,53 @@ func TestLabNameFromYAML(t *testing.T) {
 		if _, err := labNameFromYAML([]byte("name: " + bad + "\n")); err == nil {
 			t.Errorf("name %q should be rejected", bad)
 		}
+	}
+}
+
+func simulateDeploy(t *testing.T, iface string) clablinks.Endpoint {
+	t.Helper()
+	host := clablinks.GetHostLinkNode()
+	ep := clablinks.NewEndpointHost(clablinks.NewEndpointGeneric(host, iface, nil))
+	if err := host.AddEndpoint(ep); err != nil {
+		t.Fatalf("AddEndpoint: %v", err)
+	}
+	return ep
+}
+
+func TestResetImplicitLinkNodes(t *testing.T) {
+	if _, ok := clablinks.GetHostLinkNode().(clablinks.EndpointOwner); !ok {
+		t.Skip("host link node unavailable in this environment")
+	}
+	resetImplicitLinkNodes()
+	simulateDeploy(t, "vx-r1_e1")
+	simulateDeploy(t, "vx-r1_e2")
+	resetImplicitLinkNodes()
+	if got := len(clablinks.GetHostLinkNode().GetEndpoints()); got != 0 {
+		t.Errorf("host endpoints after reset = %d, want 0", got)
+	}
+}
+
+func TestHostNodeAccumulationAcrossDeploys(t *testing.T) {
+	if _, ok := clablinks.GetHostLinkNode().(clablinks.EndpointOwner); !ok {
+		t.Skip("host link node unavailable in this environment")
+	}
+	resetImplicitLinkNodes()
+	const iface = "vx-r1_e1"
+
+	ep1 := simulateDeploy(t, iface)
+	if err := clablinks.CheckEndpointUniqueness(ep1); err != nil {
+		t.Fatalf("deploy #1 should verify clean, got: %v", err)
+	}
+
+	ep2 := simulateDeploy(t, iface)
+	if err := clablinks.CheckEndpointUniqueness(ep2); err == nil {
+		t.Fatal("2nd deploy without reset should fail with duplicate endpoint")
+	}
+
+	resetImplicitLinkNodes()
+	ep3 := simulateDeploy(t, iface)
+	if err := clablinks.CheckEndpointUniqueness(ep3); err != nil {
+		t.Errorf("deploy after reset should verify clean, got: %v", err)
 	}
 }
 
