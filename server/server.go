@@ -74,6 +74,14 @@ func labState(name string, containers []clabruntime.GenericContainer) *clabv1.La
 	return ls
 }
 
+func inspectLabState(name string, containers []clabruntime.GenericContainer) *clabv1.LabState {
+	ls := labState(name, containers)
+	for i := range containers {
+		ls.Nodes[i].Labels = containers[i].Labels
+	}
+	return ls
+}
+
 func labNameFromYAML(y []byte) (string, error) {
 	var t struct {
 		Name string `yaml:"name"`
@@ -295,7 +303,7 @@ func (s *server) Inspect(ctx context.Context, req *clabv1.InspectRequest) (*clab
 	if err != nil {
 		return nil, toStatus(err)
 	}
-	return labState(req.LabName, containers), nil
+	return inspectLabState(req.LabName, containers), nil
 }
 
 func (s *server) Exec(ctx context.Context, req *clabv1.ExecRequest) (*clabv1.ExecResponse, error) {

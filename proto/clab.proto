@@ -30,6 +30,7 @@ message Node {
   // CIDR form (e.g. 172.20.20.2/24), or "N/A" when unset
   string ipv4_address = 5;
   string ipv6_address = 6;
+  map<string, string> labels = 7;
 }
 
 message LabState {

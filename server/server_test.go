@@ -60,6 +60,23 @@ func TestToNode(t *testing.T) {
 	}
 }
 
+func TestInspectLabStateIncludesLabels(t *testing.T) {
+	containers := []clabruntime.GenericContainer{{
+		State: "running",
+		Labels: map[string]string{
+			clabconstants.NodeName:     "srsim1-A",
+			clabconstants.RootNodeName: "srsim1",
+		},
+	}}
+	if got := labState("lab1", containers); got.Nodes[0].Labels != nil {
+		t.Errorf("non-inspect labels = %v, want nil", got.Nodes[0].Labels)
+	}
+	got := inspectLabState("lab1", containers)
+	if got.Nodes[0].Labels[clabconstants.RootNodeName] != "srsim1" {
+		t.Errorf("inspect labels = %v, want root node label", got.Nodes[0].Labels)
+	}
+}
+
 func TestToStatus(t *testing.T) {
 	if toStatus(nil) != nil {
 		t.Error("toStatus(nil) should be nil")

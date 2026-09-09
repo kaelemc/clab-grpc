@@ -29,8 +29,9 @@ type Node struct {
 	Image string                 `protobuf:"bytes,3,opt,name=image,proto3" json:"image,omitempty"`
 	State string                 `protobuf:"bytes,4,opt,name=state,proto3" json:"state,omitempty"`
 	// CIDR form (e.g. 172.20.20.2/24), or "N/A" when unset
-	Ipv4Address   string `protobuf:"bytes,5,opt,name=ipv4_address,json=ipv4Address,proto3" json:"ipv4_address,omitempty"`
-	Ipv6Address   string `protobuf:"bytes,6,opt,name=ipv6_address,json=ipv6Address,proto3" json:"ipv6_address,omitempty"`
+	Ipv4Address   string            `protobuf:"bytes,5,opt,name=ipv4_address,json=ipv4Address,proto3" json:"ipv4_address,omitempty"`
+	Ipv6Address   string            `protobuf:"bytes,6,opt,name=ipv6_address,json=ipv6Address,proto3" json:"ipv6_address,omitempty"`
+	Labels        map[string]string `protobuf:"bytes,7,rep,name=labels,proto3" json:"labels,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -105,6 +106,13 @@ func (x *Node) GetIpv6Address() string {
 		return x.Ipv6Address
 	}
 	return ""
+}
+
+func (x *Node) GetLabels() map[string]string {
+	if x != nil {
+		return x.Labels
+	}
+	return nil
 }
 
 type LabState struct {
@@ -943,14 +951,18 @@ var File_proto_clab_proto protoreflect.FileDescriptor
 
 const file_proto_clab_proto_rawDesc = "" +
 	"\n" +
-	"\x10proto/clab.proto\x12\aclab.v1\"\xa0\x01\n" +
+	"\x10proto/clab.proto\x12\aclab.v1\"\x8e\x02\n" +
 	"\x04Node\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x12\n" +
 	"\x04kind\x18\x02 \x01(\tR\x04kind\x12\x14\n" +
 	"\x05image\x18\x03 \x01(\tR\x05image\x12\x14\n" +
 	"\x05state\x18\x04 \x01(\tR\x05state\x12!\n" +
 	"\fipv4_address\x18\x05 \x01(\tR\vipv4Address\x12!\n" +
-	"\fipv6_address\x18\x06 \x01(\tR\vipv6Address\"J\n" +
+	"\fipv6_address\x18\x06 \x01(\tR\vipv6Address\x121\n" +
+	"\x06labels\x18\a \x03(\v2\x19.clab.v1.Node.LabelsEntryR\x06labels\x1a9\n" +
+	"\vLabelsEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"J\n" +
 	"\bLabState\x12\x19\n" +
 	"\blab_name\x18\x01 \x01(\tR\alabName\x12#\n" +
 	"\x05nodes\x18\x02 \x03(\v2\r.clab.v1.NodeR\x05nodes\"\x85\x02\n" +
@@ -1043,7 +1055,7 @@ func file_proto_clab_proto_rawDescGZIP() []byte {
 	return file_proto_clab_proto_rawDescData
 }
 
-var file_proto_clab_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
+var file_proto_clab_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
 var file_proto_clab_proto_goTypes = []any{
 	(*Node)(nil),                   // 0: clab.v1.Node
 	(*LabState)(nil),               // 1: clab.v1.LabState
@@ -1058,29 +1070,31 @@ var file_proto_clab_proto_goTypes = []any{
 	(*HostStatsRequest)(nil),       // 10: clab.v1.HostStatsRequest
 	(*StreamHostStatsRequest)(nil), // 11: clab.v1.StreamHostStatsRequest
 	(*HostStats)(nil),              // 12: clab.v1.HostStats
+	nil,                            // 13: clab.v1.Node.LabelsEntry
 }
 var file_proto_clab_proto_depIdxs = []int32{
-	0,  // 0: clab.v1.LabState.nodes:type_name -> clab.v1.Node
-	8,  // 1: clab.v1.ExecResponse.results:type_name -> clab.v1.ExecResult
-	2,  // 2: clab.v1.Containerlab.Deploy:input_type -> clab.v1.DeployRequest
-	3,  // 3: clab.v1.Containerlab.Destroy:input_type -> clab.v1.DestroyRequest
-	5,  // 4: clab.v1.Containerlab.Redeploy:input_type -> clab.v1.RedeployRequest
-	6,  // 5: clab.v1.Containerlab.Inspect:input_type -> clab.v1.InspectRequest
-	7,  // 6: clab.v1.Containerlab.Exec:input_type -> clab.v1.ExecRequest
-	10, // 7: clab.v1.Containerlab.GetHostStats:input_type -> clab.v1.HostStatsRequest
-	11, // 8: clab.v1.Containerlab.StreamHostStats:input_type -> clab.v1.StreamHostStatsRequest
-	1,  // 9: clab.v1.Containerlab.Deploy:output_type -> clab.v1.LabState
-	4,  // 10: clab.v1.Containerlab.Destroy:output_type -> clab.v1.DestroyResponse
-	1,  // 11: clab.v1.Containerlab.Redeploy:output_type -> clab.v1.LabState
-	1,  // 12: clab.v1.Containerlab.Inspect:output_type -> clab.v1.LabState
-	9,  // 13: clab.v1.Containerlab.Exec:output_type -> clab.v1.ExecResponse
-	12, // 14: clab.v1.Containerlab.GetHostStats:output_type -> clab.v1.HostStats
-	12, // 15: clab.v1.Containerlab.StreamHostStats:output_type -> clab.v1.HostStats
-	9,  // [9:16] is the sub-list for method output_type
-	2,  // [2:9] is the sub-list for method input_type
-	2,  // [2:2] is the sub-list for extension type_name
-	2,  // [2:2] is the sub-list for extension extendee
-	0,  // [0:2] is the sub-list for field type_name
+	13, // 0: clab.v1.Node.labels:type_name -> clab.v1.Node.LabelsEntry
+	0,  // 1: clab.v1.LabState.nodes:type_name -> clab.v1.Node
+	8,  // 2: clab.v1.ExecResponse.results:type_name -> clab.v1.ExecResult
+	2,  // 3: clab.v1.Containerlab.Deploy:input_type -> clab.v1.DeployRequest
+	3,  // 4: clab.v1.Containerlab.Destroy:input_type -> clab.v1.DestroyRequest
+	5,  // 5: clab.v1.Containerlab.Redeploy:input_type -> clab.v1.RedeployRequest
+	6,  // 6: clab.v1.Containerlab.Inspect:input_type -> clab.v1.InspectRequest
+	7,  // 7: clab.v1.Containerlab.Exec:input_type -> clab.v1.ExecRequest
+	10, // 8: clab.v1.Containerlab.GetHostStats:input_type -> clab.v1.HostStatsRequest
+	11, // 9: clab.v1.Containerlab.StreamHostStats:input_type -> clab.v1.StreamHostStatsRequest
+	1,  // 10: clab.v1.Containerlab.Deploy:output_type -> clab.v1.LabState
+	4,  // 11: clab.v1.Containerlab.Destroy:output_type -> clab.v1.DestroyResponse
+	1,  // 12: clab.v1.Containerlab.Redeploy:output_type -> clab.v1.LabState
+	1,  // 13: clab.v1.Containerlab.Inspect:output_type -> clab.v1.LabState
+	9,  // 14: clab.v1.Containerlab.Exec:output_type -> clab.v1.ExecResponse
+	12, // 15: clab.v1.Containerlab.GetHostStats:output_type -> clab.v1.HostStats
+	12, // 16: clab.v1.Containerlab.StreamHostStats:output_type -> clab.v1.HostStats
+	10, // [10:17] is the sub-list for method output_type
+	3,  // [3:10] is the sub-list for method input_type
+	3,  // [3:3] is the sub-list for extension type_name
+	3,  // [3:3] is the sub-list for extension extendee
+	0,  // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_proto_clab_proto_init() }
@@ -1094,7 +1108,7 @@ func file_proto_clab_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_clab_proto_rawDesc), len(file_proto_clab_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   13,
+			NumMessages:   14,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
