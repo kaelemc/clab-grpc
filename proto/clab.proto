@@ -12,6 +12,7 @@ service Containerlab {
   rpc Destroy  (DestroyRequest)  returns (DestroyResponse);
   // Redeploy is a server-side Destroy followed by Deploy.
   rpc Redeploy (RedeployRequest) returns (LabState);
+  rpc Apply    (ApplyRequest)    returns (ApplyResponse);
   rpc Inspect  (InspectRequest)  returns (LabState);
   rpc Exec     (ExecRequest)     returns (ExecResponse);
 
@@ -71,6 +72,28 @@ message RedeployRequest {
   bool cleanup = 4;
   uint32 max_workers = 5;
   bool keep_mgmt_net = 6;
+}
+
+message ApplyRequest {
+  bytes topology_yaml = 1;
+  string runtime = 2;
+  uint32 timeout_seconds = 3;
+  uint32 max_workers = 4;
+  bool skip_post_deploy = 5;
+}
+
+message ApplyResponse {
+  string lab_name = 1;
+  // true when the lab was absent and got a full deploy
+  bool deployed_lab = 2;
+  repeated string added_nodes = 3;
+  repeated string deleted_nodes = 4;
+  repeated string recreated_nodes = 5;
+  repeated string started_nodes = 6;
+  repeated string restarted_nodes = 7;
+  repeated string added_links = 8;
+  repeated string deleted_endpoints = 9;
+  map<string, string> node_change_reasons = 10;
 }
 
 // lab_name empty = inspect all containerlab-managed labs on the host.

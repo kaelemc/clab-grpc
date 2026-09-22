@@ -285,6 +285,51 @@ func (s *server) Redeploy(ctx context.Context, req *clabv1.RedeployRequest) (*cl
 	}, topoPath)
 }
 
+func (s *server) Apply(ctx context.Context, req *clabv1.ApplyRequest) (*clabv1.ApplyResponse, error) {
+	if len(req.TopologyYaml) == 0 {
+		return nil, status.Error(codes.InvalidArgument, "topology_yaml is required")
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	name, err := labNameFromYAML(req.TopologyYaml)
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+	topoPath, err := s.writeTopo(name, req.TopologyYaml)
+	if err != nil {
+		return nil, toStatus(err)
+	}
+	c, err := clabcore.NewContainerLab(
+		commonOpts(req.Runtime, req.TimeoutSeconds, clabcore.WithTopoPath(topoPath, nil))...,
+	)
+	if err != nil {
+		return nil, toStatus(err)
+	}
+	ao, err := clabcore.NewApplyOptions(uint(req.MaxWorkers))
+	if err != nil {
+		return nil, toStatus(err)
+	}
+	ao.SetSkipPostDeploy(req.SkipPostDeploy)
+
+	resetImplicitLinkNodes()
+	r, err := c.Apply(ctx, ao)
+	if err != nil {
+		return nil, toStatus(err)
+	}
+	return &clabv1.ApplyResponse{
+		LabName:           c.Config.Name,
+		DeployedLab:       r.DeployedLab,
+		AddedNodes:        r.AddedNodes,
+		DeletedNodes:      r.DeletedNodes,
+		RecreatedNodes:    r.RecreatedNodes,
+		StartedNodes:      r.StartedNodes,
+		RestartedNodes:    r.RestartedNodes,
+		AddedLinks:        r.AddedLinks,
+		DeletedEndpoints:  r.DeletedEndpoints,
+		NodeChangeReasons: r.NodeChangeReasons,
+	}, nil
+}
+
 func (s *server) Inspect(ctx context.Context, req *clabv1.InspectRequest) (*clabv1.LabState, error) {
 	opts := commonOpts(req.Runtime, req.TimeoutSeconds)
 	if req.LabName != "" {
