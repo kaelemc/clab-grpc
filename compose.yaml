@@ -1,0 +1,15 @@
+services:
+  clab-grpc:
+    image: registry.nlkc.dev/pub/kclabagent:v0.0.1
+    container_name: clab-grpc
+    restart: unless-stopped
+    privileged: true
+    network_mode: host
+    pid: host
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/run/netns:/var/run/netns
+      - /etc/hosts:/etc/hosts
+      - /var/lib/docker/containers:/var/lib/docker/containers
+      - /var/lib/clab-grpc:/var/lib/clab-grpc
+      - /root/license.txt:/root/license.txt:ro

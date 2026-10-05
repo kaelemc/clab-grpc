@@ -135,12 +135,8 @@ func toStatus(err error) error {
 
 func resetImplicitLinkNodes() {
 	for _, n := range []clablinks.Node{clablinks.GetHostLinkNode(), clablinks.GetMgmtBrLinkNode()} {
-		owner, ok := n.(clablinks.EndpointOwner)
-		if !ok {
-			continue
-		}
 		for _, e := range append([]clablinks.Endpoint(nil), n.GetEndpoints()...) {
-			_ = owner.ReleaseEndpoint(e)
+			_ = n.ReleaseEndpoint(e)
 		}
 	}
 }
@@ -190,11 +186,11 @@ func (s *server) doDeploy(ctx context.Context, req *clabv1.DeployRequest, topoPa
 	do.SetReconfigure(req.Reconfigure).SetSkipPostDeploy(req.SkipPostDeploy)
 
 	resetImplicitLinkNodes()
-	containers, err := c.Deploy(ctx, do)
+	res, err := c.Deploy(ctx, do)
 	if err != nil {
 		return nil, toStatus(err)
 	}
-	return labState(c.Config.Name, containers), nil
+	return labState(c.Config.Name, res.Containers), nil
 }
 
 func (s *server) Destroy(ctx context.Context, req *clabv1.DestroyRequest) (*clabv1.DestroyResponse, error) {

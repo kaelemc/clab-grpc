@@ -137,9 +137,6 @@ func simulateDeploy(t *testing.T, iface string) clablinks.Endpoint {
 }
 
 func TestResetImplicitLinkNodes(t *testing.T) {
-	if _, ok := clablinks.GetHostLinkNode().(clablinks.EndpointOwner); !ok {
-		t.Skip("host link node unavailable in this environment")
-	}
 	resetImplicitLinkNodes()
 	simulateDeploy(t, "vx-r1_e1")
 	simulateDeploy(t, "vx-r1_e2")
@@ -150,9 +147,6 @@ func TestResetImplicitLinkNodes(t *testing.T) {
 }
 
 func TestHostNodeAccumulationAcrossDeploys(t *testing.T) {
-	if _, ok := clablinks.GetHostLinkNode().(clablinks.EndpointOwner); !ok {
-		t.Skip("host link node unavailable in this environment")
-	}
 	resetImplicitLinkNodes()
 	const iface = "vx-r1_e1"
 
